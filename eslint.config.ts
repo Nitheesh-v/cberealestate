@@ -7,8 +7,8 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   { plugins: { '@next/next': nextPlugin } },
   {
-    files: ['apps/frontend/**/*.{ts,tsx}'],
-    settings: { next: { rootDir: new URL('./apps/frontend/', import.meta.url).pathname } },
+    files: ['frontend/**/*.{ts,tsx}'],
+    settings: { next: { rootDir: new URL('./frontend/', import.meta.url).pathname } },
     rules: {
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs['core-web-vitals'].rules,
