@@ -1,0 +1,80 @@
+{
+  "name": "@sbr/backend",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "nest build",
+    "start": "node dist/main",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test --max-warnings 0",
+    "test": "jest --runInBand",
+    "test:e2e": "jest --runInBand --testRegex app.e2e-spec.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.2.10",
+    "@nestjs/core": "^11.2.10",
+    "@nestjs/platform-express": "^11.2.10",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/mongoose": "^11.0.4",
+    "mongoose": "^8.18.0",
+    "@nestjs/swagger": "^11.4.8",
+    "swagger-ui-express": "^5.0.1",
+    "class-validator": "^0.14.2",
+    "class-transformer": "^0.5.1",
+    "@nestjs-modules/ioredis": "^2.0.2",
+    "ioredis": "^5.7.0",
+    "@nestjs/bullmq": "^11.0.5",
+    "bullmq": "^5.58.0",
+    "helmet": "^8.1.0",
+    "compression": "^1.8.1",
+    "morgan": "^1.10.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "@nestjs/passport": "^11.0.5",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.24",
+    "@nestjs/testing": "^11.2.10",
+    "@types/node": "^22.18.0",
+    "@types/express": "^5.0.3",
+    "@types/compression": "^1.8.1",
+    "@types/morgan": "^1.9.10",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/jest": "^29.5.14",
+    "@types/supertest": "^6.0.3",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.1",
+    "supertest": "^7.1.4",
+    "typescript": "^5.9.2",
+    "eslint": "^9.35.0",
+    "typescript-eslint": "^8.42.0",
+    "@eslint/js": "^9.35.0",
+    "jiti": "^2.5.1"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.(spec|e2e-spec)\\.ts$",
+    "transform": {
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.json"
+        }
+      ]
+    },
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/main.ts"
+    ]
+  }
+}
