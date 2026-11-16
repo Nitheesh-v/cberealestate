@@ -1,0 +1,35 @@
+import { validateEnvironment } from './environment';
+const valid = {
+  NODE_ENV: 'test',
+  MONGODB_URI: 'mongodb://db/test',
+  REDIS_HOST: 'redis',
+  FRONTEND_URL: 'https://example.test',
+  JWT_SECRET: 'a'.repeat(40),
+  JWT_REFRESH_SECRET: 'b'.repeat(40),
+};
+describe('validateEnvironment', () => {
+  it('casts port and applies defaults', () => {
+    expect(validateEnvironment({ ...valid, PORT: '5050' })).toMatchObject({
+      PORT: 5050,
+      REDIS_PORT: 6379,
+    });
+  });
+  it('rejects missing infrastructure', () => {
+    expect(() => validateEnvironment({})).toThrow('Invalid environment');
+  });
+  it.each(['*', 'https://example.test/', 'javascript:alert(1)', ''])(
+    'rejects unsafe CORS origin %s',
+    (origin) => {
+      expect(() => validateEnvironment({ ...valid, FRONTEND_URL: origin })).toThrow();
+    },
+  );
+  it('rejects shared production secrets', () => {
+    expect(() =>
+      validateEnvironment({
+        ...valid,
+        NODE_ENV: 'production',
+        JWT_REFRESH_SECRET: valid.JWT_SECRET,
+      }),
+    ).toThrow('distinct');
+  });
+});
