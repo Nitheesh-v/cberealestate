@@ -12,6 +12,7 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { AccountActions } from '@/components/auth/AccountActions';
 import { Separator } from '@/components/ui/separator';
 import { Brand } from '@/components/shared/Brand';
 import { NAV_LINKS } from '@/lib/constants';
@@ -62,14 +63,9 @@ export function MobileMenu(): React.JSX.Element {
         </nav>
         <Separator />
         <div className="mt-6 space-y-3">
-          <Button asChild className="w-full">
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button asChild variant="outline" className="w-full">
-            <Link href="/register">Create an account</Link>
-          </Button>
+          <AccountActions mobile />
           <Button asChild variant="ghost" className="w-full">
-            <Link href="/login?returnTo=%2Fdashboard">List Property</Link>
+            <Link href="/dashboard">List Property</Link>
           </Button>
         </div>
       </SheetContent>

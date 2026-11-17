@@ -1,6 +1,11 @@
 import { validateEnvironment } from './environment';
 const valid = {
   NODE_ENV: 'test',
+  APP_URL: 'https://example.test',
+  SMTP_HOST: 'smtp.example.test',
+  SMTP_USER: 'user',
+  SMTP_PASSWORD: 'test-only',
+  SMTP_FROM: 'noreply@example.test',
   MONGODB_URI: 'mongodb://db/test',
   REDIS_HOST: 'redis',
   FRONTEND_URL: 'https://example.test',

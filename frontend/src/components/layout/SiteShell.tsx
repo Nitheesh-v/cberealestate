@@ -12,9 +12,15 @@ export function SiteShell({
   footer: ReactNode;
 }): React.JSX.Element {
   const pathname = usePathname();
-  const privateChrome = ['/login', '/register', '/dashboard', '/admin'].some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`),
-  );
+  const privateChrome = [
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/verify-otp',
+    '/dashboard',
+    '/admin',
+  ].some((route) => pathname === route || pathname.startsWith(`${route}/`));
   return (
     <>
       {!privateChrome && header}

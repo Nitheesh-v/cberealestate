@@ -23,7 +23,7 @@ import { EmailModule } from './modules/email/email.module';
 import { ImageModule } from './modules/image-processing/image.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { AdminModule } from './modules/admin/admin.module';
-/** Composition root for Phase 1 infrastructure and feature boundaries. */
+/** Composition root for infrastructure, indexed models and authentication. */
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,7 +37,11 @@ import { AdminModule } from './modules/admin/admin.module';
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        connection: { ...getRedisOptions(config), maxRetriesPerRequest: null },
+        connection: {
+          ...getRedisOptions(config),
+          commandTimeout: undefined,
+          maxRetriesPerRequest: null,
+        },
       }),
     }),
     AuthModule,

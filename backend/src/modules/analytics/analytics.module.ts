@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
-/** Phase 1 analytics module boundary; no feature endpoints are exposed. */
-@Module({})
+import { MongooseModule } from '@nestjs/mongoose';
+import { Analytics, AnalyticsSchema } from './schemas/analytics.schema';
+/** Registers the indexed analytics model for subsequent feature modules. */
+@Module({
+  imports: [MongooseModule.forFeature([{ name: Analytics.name, schema: AnalyticsSchema }])],
+  exports: [MongooseModule],
+})
 export class AnalyticsModule {}

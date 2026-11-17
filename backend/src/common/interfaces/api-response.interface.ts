@@ -16,8 +16,3 @@ export interface ApiResponse<T> {
   data: T;
   meta: ResponseMeta;
 }
-export interface RequestUser {
-  id: string;
-  email?: string;
-  roles: string[];
-}

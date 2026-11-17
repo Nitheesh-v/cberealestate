@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
-import type { RequestUser } from '../interfaces/api-response.interface';
+import type { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 /** Enforces route roles after authentication has populated a user. */
 @Injectable()
@@ -15,8 +15,8 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
     if (!roles?.length) return true;
-    const user = context.switchToHttp().getRequest<Request & { user?: RequestUser }>().user;
-    if (!user?.roles?.some((role) => roles.includes(role)))
+    const user = context.switchToHttp().getRequest<Request & { user?: ActiveUserData }>().user;
+    if (!user || !roles.includes(user.role))
       throw new ForbiddenException('Insufficient permissions');
     return true;
   }

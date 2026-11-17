@@ -1,19 +1,10 @@
-import { PlaceholderPage } from '@/components/shared/PlaceholderPage';
+import { DashboardHome } from '@/components/auth/DashboardHome';
 import { SEO } from '@/components/shared/SEO';
 export const metadata = {
-  ...SEO({
-    title: 'Dashboard',
-    description: 'Your properties, conversations, and saved spaces. Coming soon.',
-    url: '/dashboard',
-  }),
+  ...SEO({ title: 'Dashboard', description: 'Your SBR account overview.', url: '/dashboard' }),
   robots: { index: false, follow: false },
 };
-/** Phase 1 placeholder; feature functionality is deliberately not enabled. */
+/** Account overview, rendered only inside the authenticated workspace gate. */
 export default function Page(): React.JSX.Element {
-  return (
-    <PlaceholderPage
-      title={'Dashboard'}
-      subtitle={'Your properties, conversations, and saved spaces. Coming soon.'}
-    />
-  );
+  return <DashboardHome />;
 }

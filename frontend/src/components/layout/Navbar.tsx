@@ -10,10 +10,13 @@ import { useUiStore } from '@/store/ui.store';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/shared/Container';
 import { Brand } from '@/components/shared/Brand';
+import { AccountActions } from '@/components/auth/AccountActions';
+import { useAuthStore } from '@/store/auth.store';
 import { MobileMenu } from './MobileMenu';
 /** Responsive sticky site navigation with an accessible mobile drawer. */
 export function Navbar(): React.JSX.Element {
   const pathname = usePathname();
+  const authenticated = useAuthStore((state) => state.isAuthenticated);
   const [scrolled, setScrolled] = useState(false);
   const openMenu = useUiStore((state) => state.setMobileMenuOpen);
   const reduceMotion = useReducedMotion();
@@ -38,7 +41,7 @@ export function Navbar(): React.JSX.Element {
           <Brand />
           <nav
             aria-label="Main navigation"
-            className="order-3 hidden w-full items-center justify-center gap-5 md:flex lg:order-none lg:w-auto lg:gap-6"
+            className="order-3 hidden w-full items-center justify-center gap-5 md:flex lg:order-none lg:w-auto lg:gap-4"
           >
             {NAV_LINKS.map(({ label, href }) => {
               const active = href === '/' ? pathname === href : pathname.startsWith(href);
@@ -64,18 +67,13 @@ export function Navbar(): React.JSX.Element {
             })}
           </nav>
           <div className="hidden items-center gap-3 md:flex">
-            <Button asChild variant="outline" size="sm" className="hidden lg:inline-flex">
-              <Link href="/login?returnTo=%2Fdashboard">
+            <Button asChild variant="outline" size="sm" className="hidden xl:inline-flex">
+              <Link href={authenticated ? '/dashboard' : '/login?returnTo=%2Fdashboard'}>
                 <Plus className="h-3.5 w-3.5" />
                 List Property
               </Link>
             </Button>
-            <Button asChild size="sm">
-              <Link href="/login">Login</Link>
-            </Button>
-            <Link href="/register" className="text-xs font-medium hover:text-accent">
-              Register
-            </Link>
+            <AccountActions />
           </div>
           <Button
             variant="ghost"

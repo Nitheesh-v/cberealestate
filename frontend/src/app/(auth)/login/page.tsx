@@ -1,19 +1,27 @@
-import { PlaceholderPage } from '@/components/shared/PlaceholderPage';
+import { Suspense } from 'react';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { SEO } from '@/components/shared/SEO';
 export const metadata = {
   ...SEO({
     title: 'Login',
-    description: 'Your personal real estate journey starts here. Sign-in is coming soon.',
+    description: 'Sign in to your SBR Real Estate account.',
     url: '/login',
   }),
   robots: { index: false, follow: false },
+  referrer: 'no-referrer' as const,
 };
-/** Phase 1 placeholder; feature functionality is deliberately not enabled. */
+/** Accessible auth page with metadata and a Suspense fallback for query parameters. */
 export default function Page(): React.JSX.Element {
   return (
-    <PlaceholderPage
-      title={'Login'}
-      subtitle={'Your personal real estate journey starts here. Sign-in is coming soon.'}
-    />
+    <Suspense
+      fallback={
+        <div className="p-12 text-center">
+          <LoadingSpinner />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

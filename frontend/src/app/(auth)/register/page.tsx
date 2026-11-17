@@ -1,19 +1,27 @@
-import { PlaceholderPage } from '@/components/shared/PlaceholderPage';
+import { Suspense } from 'react';
+import { RegisterForm } from '@/components/auth/RegisterForm';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { SEO } from '@/components/shared/SEO';
 export const metadata = {
   ...SEO({
-    title: 'Register',
-    description: 'Make room for new possibilities. Registration is coming soon.',
+    title: 'Create an Account',
+    description: 'Register as a buyer, renter, or property agent.',
     url: '/register',
   }),
   robots: { index: false, follow: false },
+  referrer: 'no-referrer' as const,
 };
-/** Phase 1 placeholder; feature functionality is deliberately not enabled. */
+/** Accessible auth page with metadata and a Suspense fallback for query parameters. */
 export default function Page(): React.JSX.Element {
   return (
-    <PlaceholderPage
-      title={'Register'}
-      subtitle={'Make room for new possibilities. Registration is coming soon.'}
-    />
+    <Suspense
+      fallback={
+        <div className="p-12 text-center">
+          <LoadingSpinner />
+        </div>
+      }
+    >
+      <RegisterForm />
+    </Suspense>
   );
 }

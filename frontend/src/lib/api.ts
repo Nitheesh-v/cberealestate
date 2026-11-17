@@ -1,49 +1,42 @@
-import axios from 'axios';
+import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { API_URL } from './constants';
-import { toast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/store/auth.store';
+import { refreshSession } from './auth-session';
 export const api = axios.create({
   baseURL: API_URL,
   timeout: 15000,
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
-/** Attaches a bearer token only when running in a browser and storage is accessible. */
+/** Attaches only the current in-memory bearer credential. */
 api.interceptors.request.use(async (config) => {
-  if (typeof window !== 'undefined') {
-    try {
-      const token = window.localStorage.getItem('accessToken');
-      if (token) config.headers.Authorization = `Bearer ${token}`;
-    } catch {
-      /* Storage can be blocked by browser privacy settings; continue unauthenticated. */
-    }
-  }
+  const token = useAuthStore.getState().accessToken;
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-/** Handles transport failures without trusting HTML or arbitrary text from a server. */
+/** Retries one time after a single-flight refresh; never recurses through auth handshakes. */
 api.interceptors.response.use(
   async (response) => response,
   async (error: unknown) => {
-    if (
-      typeof window !== 'undefined' &&
-      axios.isAxiosError<unknown>(error) &&
-      !axios.isCancel(error)
-    ) {
-      if (error.response?.status === 401) {
-        try {
-          window.localStorage.removeItem('accessToken');
-        } catch {
-          /* Storage is optional. */
-        }
-        if (!['/login', '/register'].includes(window.location.pathname))
-          window.location.assign(`/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
-      }
-      toast({
-        title: 'Request unsuccessful',
-        description:
-          error.response?.status === 401
-            ? 'Please sign in to continue.'
-            : 'We could not complete your request. Please try again.',
-      });
+    if (!axios.isAxiosError(error)) throw error;
+    const request = error.config as
+      (InternalAxiosRequestConfig & { retried?: boolean }) | undefined;
+    if (error.response?.status !== 401 || !request || request.retried) throw error;
+    request.retried = true;
+    const epoch = useAuthStore.getState().sessionEpoch;
+    try {
+      const session = await refreshSession();
+      request.headers.Authorization = `Bearer ${session.accessToken}`;
+    } catch {
+      if (useAuthStore.getState().sessionEpoch !== epoch) throw error;
+      useAuthStore.getState().clearAuth();
+      if (
+        typeof window !== 'undefined' &&
+        /^\/(dashboard|admin)(?:\/|$)/.test(window.location.pathname)
+      )
+        window.location.assign(`/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
+      throw error;
     }
-    throw error;
+    return api.request(request);
   },
 );

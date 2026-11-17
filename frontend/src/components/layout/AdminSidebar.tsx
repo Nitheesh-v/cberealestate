@@ -24,7 +24,7 @@ const items = [
   { label: 'Analytics', icon: ChartNoAxesCombined, href: '/admin#analytics' },
   { label: 'Settings', icon: Settings, href: '/admin#settings' },
 ];
-/** Presentational admin navigation only; access control arrives in a future phase. */
+/** Admin navigation rendered inside the role-protected layout. */
 export function AdminSidebar(): React.JSX.Element {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -66,9 +66,9 @@ export function AdminSidebar(): React.JSX.Element {
         ))}
       </nav>
       <p className="mt-6 text-xs leading-5 text-muted-foreground">
-        Phase 1 preview.
+        Administration.
         <br />
-        Admin tools are not yet enabled.
+        Management screens arrive in a later phase.
       </p>
     </aside>
   );

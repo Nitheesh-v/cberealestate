@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-/** JWT guard foundation; not globally enabled until a strategy is supplied in Phase 2. */
+/** Global JWT guard; only explicitly public routes bypass authentication. */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
   /** Injects route metadata access. */

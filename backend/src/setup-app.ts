@@ -1,6 +1,7 @@
 import { ForbiddenException, type INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import morgan from 'morgan';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -16,7 +17,10 @@ export function setupApp(app: INestApplication): void {
     .split(',')
     .map((origin) => origin.trim());
   app.setGlobalPrefix(config.get<string>('API_PREFIX') ?? 'api');
+  const server: import('express').Express = app.getHttpAdapter().getInstance();
+  server.set('trust proxy', Number(config.get<number>('TRUST_PROXY_HOPS') ?? 0));
   app.use(helmet());
+  app.use(cookieParser());
   app.use(compression());
   morgan.token('safe-path', (request) => request.url?.split('?')[0] ?? '-');
   app.use(
@@ -37,6 +41,17 @@ export function setupApp(app: INestApplication): void {
       _response: import('express').Response,
       next: import('express').NextFunction,
     ) => {
+      const cookieBag: unknown = request.cookies;
+      const hasAuthCookie =
+        typeof cookieBag === 'object' &&
+        cookieBag !== null &&
+        ('refreshToken' in cookieBag || 'accessToken' in cookieBag);
+      if (
+        !['GET', 'HEAD', 'OPTIONS'].includes(request.method) &&
+        hasAuthCookie &&
+        !request.headers.origin
+      )
+        throw new ForbiddenException('Origin header required for cookie-authenticated requests');
       if (request.headers.origin && !allowedOrigins.includes(request.headers.origin))
         throw new ForbiddenException('Origin not allowed');
       next();

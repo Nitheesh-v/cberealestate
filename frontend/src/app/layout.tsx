@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
+import { AuthProvider } from '@/providers/AuthProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { Navbar } from '@/components/layout/Navbar';
@@ -50,11 +51,13 @@ export default function RootLayout({
         </a>
         <QueryProvider>
           <ThemeProvider>
-            <SiteShell header={<Navbar />} footer={<Footer />}>
-              {children}
-            </SiteShell>
-            <ScrollToTop />
-            <Toaster />
+            <AuthProvider>
+              <SiteShell header={<Navbar />} footer={<Footer />}>
+                {children}
+              </SiteShell>
+              <ScrollToTop />
+              <Toaster />
+            </AuthProvider>
           </ThemeProvider>
         </QueryProvider>
       </body>

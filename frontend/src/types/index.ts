@@ -1,8 +1,5 @@
-export enum UserRole {
-  User = 'user',
-  Agent = 'agent',
-  Admin = 'admin',
-}
+export { UserRole } from './user.types';
+export type { User } from './user.types';
 export enum PropertyType {
   Apartment = 'apartment',
   Villa = 'villa',
@@ -10,10 +7,13 @@ export enum PropertyType {
   Plot = 'plot',
   Commercial = 'commercial',
   Penthouse = 'penthouse',
+  Studio = 'studio',
+  Duplex = 'duplex',
 }
 export enum ListingType {
   Sale = 'sale',
   Rent = 'rent',
+  Lease = 'lease',
 }
 export enum PropertyStatus {
   Draft = 'draft',
@@ -22,16 +22,9 @@ export enum PropertyStatus {
   Rented = 'rented',
 }
 export enum FurnishedType {
-  Furnished = 'furnished',
+  Furnished = 'fully-furnished',
   SemiFurnished = 'semi-furnished',
   Unfurnished = 'unfurnished',
-}
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  createdAt: string;
 }
 export interface Property {
   id: string;

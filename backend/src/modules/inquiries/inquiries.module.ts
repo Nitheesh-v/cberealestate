@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
-/** Phase 1 inquiries module boundary; no feature endpoints are exposed. */
-@Module({})
+import { MongooseModule } from '@nestjs/mongoose';
+import { Inquiry, InquirySchema } from './schemas/inquiry.schema';
+/** Registers the indexed inquiries model for subsequent feature modules. */
+@Module({
+  imports: [MongooseModule.forFeature([{ name: Inquiry.name, schema: InquirySchema }])],
+  exports: [MongooseModule],
+})
 export class InquiriesModule {}
