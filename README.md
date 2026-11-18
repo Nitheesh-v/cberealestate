@@ -2,6 +2,62 @@
 
 A strict-TypeScript real estate platform with **two independent apps**, indexed MongoDB schemas and complete account authentication. Phase 2 adds registration, email verification, rotating cookie sessions, password recovery, profile editing and admin-only user APIs. Property CRUD and the remaining public content screens belong to later phases.
 
+## Run everything on localhost (Windows / PowerShell)
+
+Install **Node.js 22.12+** and **Docker Desktop with Linux containers**, and start Docker Desktop first. MongoDB, Redis and the local email inbox run in Docker; the frontend and backend still run as separate npm projects on your machine.
+
+From the repository root, stop old app processes, then run:
+
+```powershell
+npm ci --prefix backend
+npm ci --prefix frontend
+npm run setup:local --prefix backend -- --apply
+npm run services:up --prefix backend
+npm run dev --prefix backend
+```
+
+Keep that terminal running. Open a **second terminal** at the repository root:
+
+```powershell
+npm run dev --prefix frontend
+```
+
+| Local service | Address |
+| --- | --- |
+| Website | http://localhost:3000 |
+| API | http://localhost:5000/api |
+| Swagger (development) | http://localhost:5000/api/docs |
+| Email inbox (OTP/reset links) | http://localhost:8025 |
+
+Register through the website, then open the local email inbox to read the verification code. Mailpit captures messages locally; it does **not** send email to real inboxes. No Gmail credentials are needed.
+
+**What `setup:local -- --apply` changes:** it backs up existing `backend/.env` and `frontend/.env.local` files beside the originals, switches database/cache/SMTP/app addresses to the checked-in localhost template, and generates distinct random JWT secrets. Unrelated settings (such as Cloudinary credentials) are retained. Existing development sessions are invalidated. Backups are ignored by Git and may contain secrets: keep them private. Omit `--apply` to refuse changes if either environment file already exists. Do not run this local setup against a production environment.
+
+The browser uses `/api` on the frontend origin; Next proxies to the backend on `127.0.0.1:5000`. MongoDB/Redis/SMTP connections use IPv4 loopback to avoid Windows `localhost` IPv6 resolution issues. The local infrastructure ports bind **only to 127.0.0.1**.
+
+### Local troubleshooting and shutdown
+
+```powershell
+npm run services:status --prefix backend
+Test-NetConnection 127.0.0.1 -Port 27017
+Test-NetConnection 127.0.0.1 -Port 6379
+curl.exe http://localhost:5000/api/health/db
+curl.exe http://localhost:5000/api/health/redis
+```
+
+- `docker` not recognized / daemon unavailable: install or start Docker Desktop. Compose V2 with `up --wait` support is required.
+- Port already allocated: an existing MongoDB/Redis/container may already use it. Stop the conflicting service or use your existing infrastructure with matching environment settings. Do not delete database volumes to solve a port conflict. The earlier `sbr-mongo`/`sbr-redis` examples and Compose must not run simultaneously on the same ports.
+- If an existing Git merge is unfinished, resolve it before pulling these changes. Do not run another pull during an unresolved merge.
+- Editing environment files requires restarting both app processes.
+
+Stop each app with **Ctrl+C**. Stop local infrastructure with:
+
+```powershell
+npm run services:down --prefix backend
+```
+
+Named volumes preserve MongoDB/Redis data across shutdowns. Do **not** add `-v` unless intentionally deleting local data. There is no root npm workspace or combined app dev command.
+
 ## Folder structure
 
 ```text
@@ -32,7 +88,7 @@ There is **no npm workspace, root package.json, root lockfile, or root node_modu
 
 - **Node.js 22.12+**, npm 10+ (Node 22 LTS recommended).
 - MongoDB 7+ (8 recommended) and Redis 7+ for the backend.
-- An SMTP account (or local SMTP test server) for verification/recovery email.
+- An SMTP account for real delivery, or the included Mailpit service for local verification/recovery email.
 - Network access to Google Fonts during an initial frontend dev/build. `next/font/google` downloads Inter and Playfair Display and self-hosts them for visitors.
 
 ## Migrating from the previous shared setup
@@ -99,7 +155,7 @@ Backend environment settings:
 - `NODE_ENV` supports `development`, `test`, `staging`, and `production`. Staging/production reject placeholder/shared JWT secrets and non-HTTPS frontend origins. Inject production secrets through your deployment environment.
 - Set `APP_URL` to the frontend origin used in recovery links; it must match an entry in `FRONTEND_URL`.
 - Configure `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_EXPIRES_IN=15m` and `JWT_REFRESH_EXPIRES_IN=7d`. Durations accept positive integer `s`, `m`, `h` or `d` values up to 31 days.
-- Set all `SMTP_*` values to a working SMTP account. Port 465 uses implicit TLS; port 587 uses STARTTLS when offered. Invalid SMTP credentials surface as retried email-job failures, not fake delivery success. Cloudinary settings are reserved for media management.
+- The default template targets local Mailpit: `SMTP_HOST=127.0.0.1`, `SMTP_PORT=1025`, `SMTP_AUTH_ENABLED=false`. To send real email, set `SMTP_AUTH_ENABLED=true` and configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `SMTP_FROM`. Port 465 uses implicit TLS; port 587 uses STARTTLS when offered. Disabled SMTP authentication is accepted only for loopback hosts in development/test, never staging/production. Invalid SMTP credentials surface as retried email-job failures, not fake delivery success. Cloudinary settings are reserved for media management.
 - `AUTH_COOKIE_SAME_SITE=lax` suits same-site deployments. Use `none` only with HTTPS staging/production for cross-site cookies (subject to browser third-party-cookie restrictions). Prefer the same-origin API proxy.
 - Set `TRUST_PROXY_HOPS` to the exact trusted reverse-proxy hop count (0 by default, maximum 5). Incorrect proxy trust undermines IP-based rate limiting.
 - `THROTTLE_TTL` and `THROTTLE_LIMIT` remain general validated settings. Authentication has separate stricter per-route Redis limits, with 429/`Retry-After` responses; limiter outages fail closed with 503.
@@ -164,9 +220,10 @@ Frontend routes: `/`, `/properties`, `/about`, `/contact`, `/services`, `/blog`,
 
 ### Verification notes
 
-- Frontend: **54 tests**, including form interactions, six-cell OTP behavior, validation, persistence, Axios retry and refresh races. Backend: **87 unit/HTTP tests**, including real JWTs/guards, cookie policy, rotation/replay, credential writes and schema hooks. MongoDB/Redis/mail are explicitly mocked in these suites; they are not live end-to-end infrastructure tests.
+- Frontend: **54 tests**, including form interactions, six-cell OTP behavior, validation, persistence, Axios retry and refresh races. Backend: **96 unit/HTTP tests**, including real JWTs/guards, cookie policy, rotation/replay, credential writes and schema hooks. MongoDB/Redis/mail are explicitly mocked in these suites; they are not live end-to-end infrastructure tests.
 - Both apps are checked with their own local dependencies, with no root `node_modules` present.
 - Google Fonts is blocked by this sandbox's outbound allowlist. Frontend build verification uses Next's font-response fixture mechanism with real Inter/Playfair font files fetched from the official Google Fonts GitHub repository. The local fixture is ignored; a normal network-enabled build does not need it. An unconfigured build in this restricted sandbox will fail at font download.
+- The local setup helper was checked in an isolated temporary fixture, including environment generation and backup behavior; Compose YAML was parsed and the backend built successfully. Docker is not installed in this sandbox, so the Compose services were not started here.
 - No live MongoDB/Redis/SMTP service was exercised in the sandbox. Verify actual persistence/index creation, Redis Lua/cooldowns and SMTP delivery with configured services. Browser checks cover responsive auth rendering, validation and unauthenticated redirects; they do not prove delivery or a live login handshake.
 - Responsive production-browser smoke checks passed on the final repeated runs (15 auth route/viewport combinations plus validation and protected redirects). Earlier production runs intermittently reported React hydration error #418; it was not reproduced in development or the subsequent diagnostic runs and remains a regression risk to investigate rather than a confirmed fix.
 - Production dependency audits reported zero vulnerabilities at verification time. Development tooling has upstream low/moderate transitive advisories; no forced breaking fixes were applied.

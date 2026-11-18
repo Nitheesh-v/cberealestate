@@ -9,11 +9,15 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src test --max-warnings 0",
+    "lint": "eslint src test scripts --max-warnings 0",
     "test": "jest --runInBand",
     "test:e2e": "jest --runInBand --testPathPattern=e2e-spec",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "setup:local": "jiti scripts/setup-local.ts",
+    "services:up": "docker compose -f docker-compose.local.yml up -d --wait",
+    "services:down": "docker compose -f docker-compose.local.yml down",
+    "services:status": "docker compose -f docker-compose.local.yml ps"
   },
   "dependencies": {
     "@nestjs-modules/ioredis": "^2.0.2",

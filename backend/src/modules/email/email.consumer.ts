@@ -19,10 +19,13 @@ export class EmailConsumer extends WorkerHost implements OnModuleDestroy {
       host: config.getOrThrow<string>('SMTP_HOST'),
       port: Number(config.get<number>('SMTP_PORT') ?? 587),
       secure: Number(config.get<number>('SMTP_PORT') ?? 587) === 465,
-      auth: {
-        user: config.getOrThrow<string>('SMTP_USER'),
-        pass: config.getOrThrow<string>('SMTP_PASSWORD'),
-      },
+      auth:
+        config.get<string>('SMTP_AUTH_ENABLED') === 'false'
+          ? undefined
+          : {
+              user: config.getOrThrow<string>('SMTP_USER'),
+              pass: config.getOrThrow<string>('SMTP_PASSWORD'),
+            },
       connectionTimeout: 10_000,
       greetingTimeout: 10_000,
       socketTimeout: 15_000,

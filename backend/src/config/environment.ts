@@ -5,6 +5,7 @@ import {
   IsUrl,
   IsInt,
   IsOptional,
+  ValidateIf,
   IsString,
   Matches,
   Max,
@@ -36,8 +37,15 @@ class EnvironmentVariables {
   @IsString() @MinLength(1) JWT_AUDIENCE = 'sbr-web';
   @IsIn(['lax', 'strict', 'none']) AUTH_COOKIE_SAME_SITE = 'lax';
   @IsString() @MinLength(1) SMTP_HOST!: string;
-  @IsString() @MinLength(1) SMTP_USER!: string;
-  @IsString() @MinLength(1) SMTP_PASSWORD!: string;
+  @IsIn(['true', 'false']) SMTP_AUTH_ENABLED = 'true';
+  @ValidateIf((config: EnvironmentVariables) => config.SMTP_AUTH_ENABLED !== 'false')
+  @IsString()
+  @MinLength(1)
+  SMTP_USER?: string;
+  @ValidateIf((config: EnvironmentVariables) => config.SMTP_AUTH_ENABLED !== 'false')
+  @IsString()
+  @MinLength(1)
+  SMTP_PASSWORD?: string;
   @IsString() @MinLength(1) SMTP_FROM!: string;
   @IsString() @MinLength(32) JWT_SECRET!: string;
   @IsString() @MinLength(32) JWT_REFRESH_SECRET!: string;
@@ -66,6 +74,12 @@ export function validateEnvironment(input: Record<string, unknown>): Record<stri
     throw new Error(
       `Invalid environment settings: ${errors.map((error) => error.property).join(', ')}`,
     );
+  if (
+    config.SMTP_AUTH_ENABLED === 'false' &&
+    (!['development', 'test'].includes(config.NODE_ENV) ||
+      !['127.0.0.1', 'localhost', '::1'].includes(config.SMTP_HOST))
+  )
+    throw new Error('Unauthenticated SMTP is allowed only on loopback in development/test');
   const origins = config.FRONTEND_URL.split(',').map((origin) => origin.trim());
   if (
     origins.length === 0 ||
