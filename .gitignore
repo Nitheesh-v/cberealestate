@@ -1,0 +1,13 @@
+# Installed agent skills (npx skills add Leonxlnx/taste-skill)
+# The install pulls ~40 MB of reference photographs and demo assets. The exact
+# version is pinned in skills-lock.json (committed), so the files are not
+# tracked here. Restore them on a fresh clone with:
+#
+#   npx skills experimental_install
+#
+/.agents/skills/
+/agent/skills/
+/.claude/skills/
+
+# Output written by the skill's gate/checker while a build is active
+.taste-skill/
