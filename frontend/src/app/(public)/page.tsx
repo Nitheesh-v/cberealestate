@@ -1,18 +1,14 @@
-import { PlaceholderPage } from '@/components/shared/PlaceholderPage';
+import { ImmersiveHome } from '@/components/home/ImmersiveHome';
 import { SEO } from '@/components/shared/SEO';
+
 export const metadata = {
   ...SEO({
     title: 'Welcome to SBR Real Estate',
-    description: 'A new home for your next chapter. Our real estate experience is coming soon.',
+    description: 'Discover spaces for the moments that matter. Explore your next chapter with SBR Real Estate.',
     url: '/',
   }),
 };
-/** Phase 1 placeholder; feature functionality is deliberately not enabled. */
+
 export default function Page(): React.JSX.Element {
-  return (
-    <PlaceholderPage
-      title={'Welcome to SBR Real Estate'}
-      subtitle={'A new home for your next chapter. Our real estate experience is coming soon.'}
-    />
-  );
+  return <ImmersiveHome />;
 }
